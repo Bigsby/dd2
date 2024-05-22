@@ -111,17 +111,18 @@ HEIGHT_FORMAT = "-7.2f"
 RANK_FORMAT = 2
 NUMBER_FORMAT = "_"
 
+def hightlight(text, colour):
+    return f"\033[48;5;{colour}m\033[38;5;0m{text}\033[0m"
+
 
 def get_live_player_line(player, record, world, rank_width):
     if not player:
         return " " * (RANK_FORMAT + 2 + NAME_WIDTH + 1 + 7 + 2 + 7 + 1 + rank_width + 1)
     text = f"{player.rank:{RANK_FORMAT}}. {player.display_name:{NAME_WIDTH}} {player.height:{HEIGHT_FORMAT}} ({record.height:{HEIGHT_FORMAT}} {record.rank:-{rank_width}})"
     if player.height >= world * .9:
-        return f"\033[38;5;{RED}m{text}\033[0m"
+        return hightlight(text, RED)
     if player.height > record.height * .9:
-        return f"\033[38;5;{GREEN}m{text}\033[0m"
-    if record.rank < 11:
-        text = f"\033[4m{text}\033[0m"
+        return hightlight(text, GREEN)
     if record.rank < 4:
         return wrap_podium_text(record.rank, text)
     return text
@@ -143,7 +144,7 @@ PODIUM_COLOURS = [0, 142, 246, 173]
 def wrap_podium_text(rank, text):
     if rank > 3:
         return text
-    return f"\033[38;5;{PODIUM_COLOURS[rank]}m{text}\033[0m"
+    return hightlight(text, PODIUM_COLOURS[rank])
 
 
 def get_prize_text(donations):
@@ -186,7 +187,7 @@ def show_data():
         print(get_prize_text(donations))
         print(f"Session: {overview.sessions:{NUMBER_FORMAT}} Falls: {overview.falls[0]:{NUMBER_FORMAT}} Jumps: {overview.jumps:{NUMBER_FORMAT}} Resets: {overview.resets:{NUMBER_FORMAT}}")
         print(f"Players: Total: {overview.players:{NUMBER_FORMAT}} Live: {overview.nb_players_live:{NUMBER_FORMAT}} (updated {overview.date})")
-        print()
+        print(hightlight("Close to PB", GREEN), hightlight("Close to WR", RED))
 
         print("Live", " " * 41, "Leaderboard")
 
