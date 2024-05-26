@@ -1,7 +1,7 @@
 import threading
-import time
 from datetime import datetime
 import sys
+import os
 from api import get_data
 from console import ESC, COLOURS, FORMATS
 
@@ -12,11 +12,11 @@ RELEASE_DATE = datetime(2024, 5, 3, 20, 00)
 FINAL_HEIGHT = 1910
 
 
-def get_live_player_line(player, record, world, rank_width):
+def get_live_player_line(player, record, world, rank_width, count):
     if not player:
         return " " * (FORMATS.RANK + 2 + FORMATS.NAME + 1 + 7 + 2 + 7 + 1 + rank_width + 1)
     text = f"{player.rank:{FORMATS.RANK}}. {player.display_name[:FORMATS.NAME]:{FORMATS.NAME}} {player.height:{FORMATS.HEIGHT}} ({record.height:{FORMATS.HEIGHT}} {record.rank:-{rank_width}})"
-    if player.height >= world * .9:
+    if player.height >= world * .95:
         return COLOURS.text(text, COLOURS.WHITE, COLOURS.RED)
     if player.height > record.height * .9:
         return COLOURS.text(text, COLOURS.WHITE, COLOURS.GREEN)
@@ -24,6 +24,9 @@ def get_live_player_line(player, record, world, rank_width):
         return COLOURS.podium(record.rank, text)
     if record.rank < 11:
         return COLOURS.text(text, COLOURS.WHITE, COLOURS.BLUE)
+    if record.rank <= count:
+        return COLOURS.text(text, COLOURS.WHITE, COLOURS.DARK_GREY)
+
     return text
 
 
@@ -59,19 +62,20 @@ def show_data():
     live_rank_width = len(str(lowest_rank))
 
     if not overview or not donations or not live_heights or not players or any([v is None for v in live_records.values()]):
-        ESC.write(COLOURS.text("Error calling API", COLOURS.RED, COLOURS.BLACK))
+        ESC.position(0,0)
+        ESC.write(COLOURS.text("API Error!", COLOURS.RED, COLOURS.BLACK))
     else:
-        now = overview.date
+        now = datetime.now()
         time_lapse = now - RELEASE_DATE
         world_record = players[0].height
         ESC.position(0,0)
-        print(f"Deep Dip 2 - {time_delta_str(time_lapse)}")
+        print(f"{COLOURS.BOLD}Deep Dip 2 {COLOURS.CLEAR_COLOURS}- {time_delta_str(time_lapse)} {ESC.CLEAR_LINE}")
         print(get_prize_text(donations))
-        print(f"Session: {overview.sessions:{FORMATS.NUMBER}} Falls: {overview.falls[0]:{FORMATS.NUMBER}} Jumps: {overview.jumps:{FORMATS.NUMBER}} Resets: {overview.resets:{FORMATS.NUMBER}}")
-        print(f"Players: Total: {overview.players:{FORMATS.NUMBER}} Live: {overview.nb_players_live:{FORMATS.NUMBER}} (updated {overview.date})")
+        print(f"Sessions: {overview.sessions:{FORMATS.NUMBER}} Falls: {overview.falls[0]:{FORMATS.NUMBER}} Jumps: {overview.jumps:{FORMATS.NUMBER}} Resets: {overview.resets:{FORMATS.NUMBER}}")
+        print(f"Players: Total: {overview.players:{FORMATS.NUMBER}} Live: {overview.nb_players_live:{FORMATS.NUMBER}} (updated {overview.date}){ESC.CLEAR_LINE}")
         print(COLOURS.text("Close to PB", COLOURS.WHITE, COLOURS.GREEN), COLOURS.text("Close to WR", COLOURS.WHITE, COLOURS.RED))
 
-        print("Live", " " * 41, "Leaderboard")
+        print("Leaderboard", " " * 43, "Live")
 
         live_count = len(live_heights)
         for index in range(PLAYER_COUNT):
@@ -80,7 +84,7 @@ def show_data():
             leader = players[index]
             leader_text = f"{leader.rank:{FORMATS.RANK}}. {leader.name[:FORMATS.NAME]:{FORMATS.NAME}} {leader.height:{FORMATS.HEIGHT}} {get_percentage_text(leader.height)} ({time_delta_str(now - leader.date)})"
             leader_text = COLOURS.podium(leader.rank, leader_text)
-            print(f"{get_live_player_line(live_player, record, world_record, live_rank_width)}", " \u2502 ", leader_text, "\033[0K")
+            print(leader_text, " \u2502 ", get_live_player_line(live_player, record, world_record, live_rank_width, PLAYER_COUNT), "\033[0K")
 
     tick(REFRESH_INTERVAL)
 
@@ -100,6 +104,8 @@ def tick(time_left):
 
 
 def main():
+    ESC.enable_focus_report()
+    ESC.enable_alt_buffer()
     ESC.hide_cursor()
     if len(sys.argv) > 1 and len(sys.argv) % 2 == 1:
         index = 0
@@ -119,13 +125,14 @@ def main():
     ESC.clear_screen()
     try:
         show_data()
-        while True:
-            time.sleep(100)
-
     except KeyboardInterrupt:
         if ticker:
             ticker.cancel()
+        ESC.disable_alt_buffer()
+        ESC.show_cursor()
+        os._exit(0)
     finally:
+        ESC.disable_alt_buffer()
         ESC.show_cursor()
 
 
