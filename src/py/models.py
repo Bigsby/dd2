@@ -54,13 +54,14 @@ class Donations():
 
 
 class Overview():
-    def __init__(self, falls, falls_raw, floors_fallen, height_fallen, jumps, nb_players_climbing, nb_players_live, players, resets, sessions, ts):
+    def __init__(self, falls, falls_raw, floors_fallen, height_fallen, jumps, nb_players_climbing, nb_players_live, players, resets, sessions, ts, nb_climbing_shallow_dip):
         self.falls = falls,
         self.falls_raw = falls_raw
         self.floors_fallen = floors_fallen
         self.height_fallen = height_fallen
         self.jumps = jumps
         self.nb_players_climbing = nb_players_climbing
+        self.nb_climbing_shallow_dip = nb_climbing_shallow_dip
         self.nb_players_live = nb_players_live
         self.players = players
         self.resets = resets

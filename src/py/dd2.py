@@ -15,18 +15,19 @@ FINAL_HEIGHT = 1910
 def get_live_player_line(player, record, world, rank_width, count):
     if not player:
         return " " * (FORMATS.RANK + 2 + FORMATS.NAME + 1 + 7 + 2 + 7 + 1 + rank_width + 1)
-    text = f"{player.rank:{FORMATS.RANK}}. {player.display_name[:FORMATS.NAME]:{FORMATS.NAME}} {player.height:{FORMATS.HEIGHT}} ({record.height:{FORMATS.HEIGHT}} {record.rank:-{rank_width}})"
+    record_text = f"({record.height:{FORMATS.HEIGHT}} {record.rank:-{rank_width}})" if record else "(" + " " * (rank_width + 8) + ")" 
+    text = f"{player.rank:{FORMATS.RANK}}. {player.display_name[:FORMATS.NAME]:{FORMATS.NAME}} {player.height:{FORMATS.HEIGHT}} {record_text}"
     if player.height >= world * .95:
         return COLOURS.text(text, COLOURS.WHITE, COLOURS.RED)
-    if player.height > record.height * .9:
-        return COLOURS.text(text, COLOURS.WHITE, COLOURS.GREEN)
-    if record.rank < 4: 
-        return COLOURS.podium(record.rank, text)
-    if record.rank < 11:
-        return COLOURS.text(text, COLOURS.WHITE, COLOURS.BLUE)
-    if record.rank <= count:
-        return COLOURS.text(text, COLOURS.WHITE, COLOURS.DARK_GREY)
-
+    if record:
+        if player.height > record.height * .9:
+            return COLOURS.text(text, COLOURS.WHITE, COLOURS.GREEN)
+        if record.rank < 4: 
+            return COLOURS.podium(record.rank, text)
+        if record.rank < 11:
+            return COLOURS.text(text, COLOURS.WHITE, COLOURS.BLUE)
+        if record.rank <= count:
+            return COLOURS.text(text, COLOURS.WHITE, COLOURS.DARK_GREY)
     return text
 
 
@@ -61,8 +62,8 @@ def show_data():
     overview, donations, live_heights, players, live_records, lowest_rank = get_data(PLAYER_COUNT)
     live_rank_width = len(str(lowest_rank))
 
-    if not overview or not donations or not live_heights or not players or any([v is None for v in live_records.values()]):
-        ESC.position(0,0)
+    if not overview or not donations or not live_heights or not players:
+        ESC.position(1,0)
         ESC.write(COLOURS.text("API Error!", COLOURS.RED, COLOURS.BLACK))
     else:
         now = datetime.now()
@@ -104,7 +105,7 @@ def tick(time_left):
 
 
 def main():
-    ESC.enable_focus_report()
+    # ESC.enable_focus_report()
     ESC.enable_alt_buffer()
     ESC.hide_cursor()
     if len(sys.argv) > 1 and len(sys.argv) % 2 == 1:

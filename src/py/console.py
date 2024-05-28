@@ -40,15 +40,15 @@ class ESC:
 
     @staticmethod
     def enable_alt_buffer():
-        ESC.write(f"{ESC.CSI}?1049h")
+        ESC.write(f"{ESC.CSI}7{ESC.CSI}?47h")
 
     @staticmethod
     def disable_alt_buffer():
-        ESC.write(f"{ESC.CSI}?1049l")
+        ESC.write(f"{ESC.CSI}[2J{ESC.CSI}?47l{ESC.CSI}8")
 
-    @staticmethod
-    def enable_focus_report():
-        ESC.write(f"{ESC.CSI}?1004h")
+    # @staticmethod
+    # def enable_focus_report():
+    #     ESC.write(f"{ESC.CSI}?1004h")
 
 
 class COLOURS:

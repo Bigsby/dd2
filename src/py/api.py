@@ -1,6 +1,7 @@
 import urllib.request
 import json
 from models import LeaderboardEntry, Player, LiveEntry, LiveHeight, ServerInfo, Overview, Donations
+from console import ESC
 
 
 API_URL = "https://dips-plus-plus.xk.io/"
