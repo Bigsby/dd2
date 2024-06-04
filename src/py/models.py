@@ -26,13 +26,16 @@ class Player():
 
 
 class LiveEntry():
-    def __init__(self, display_name, height, ts, rank, user_id):
+    def __init__(self, display_name, height, ts, rank, user_id, color, pos, vel):
         self.rank = rank
         self.display_name = display_name
         self.user_id = user_id
         self.height = height
         self.ts = ts
         self.date = datetime.fromtimestamp(ts)
+        self.color = color,
+        self.pos = pos
+        self.vel = vel
 
 
 class LiveHeight():

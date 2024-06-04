@@ -49,7 +49,7 @@ def get_prize_text(donations):
     prize_text += ", "
     prize_text += COLOURS.podium(2, f"2nd ${donations.pp_total * .3:{FORMATS.CURRENCY}}")
     prize_text += ", "
-    prize_text += COLOURS.podium(3, f"2nd ${donations.pp_total * .2:{FORMATS.CURRENCY}}")
+    prize_text += COLOURS.podium(3, f"3rd ${donations.pp_total * .2:{FORMATS.CURRENCY}}")
     prize_text += ")"
     return prize_text
 
@@ -59,7 +59,9 @@ def get_percentage_text(height):
 
 
 def show_data():
-    overview, donations, live_heights, players, live_records, lowest_rank = get_data(PLAYER_COUNT)
+    data = get_data(PLAYER_COUNT)
+    # print(data); input()
+    overview, donations, live_heights, players, live_records, lowest_rank = data
     live_rank_width = len(str(lowest_rank))
 
     if not overview or not donations or not live_heights or not players:
@@ -71,9 +73,11 @@ def show_data():
         world_record = players[0].height
         ESC.position(0,0)
         print(f"{COLOURS.BOLD}Deep Dip 2 {COLOURS.CLEAR_COLOURS}- {time_delta_str(time_lapse)} {ESC.CLEAR_LINE}")
-        print(get_prize_text(donations))
-        print(f"Sessions: {overview.sessions:{FORMATS.NUMBER}} Falls: {overview.falls[0]:{FORMATS.NUMBER}} Jumps: {overview.jumps:{FORMATS.NUMBER}} Resets: {overview.resets:{FORMATS.NUMBER}}")
-        print(f"Players: Total: {overview.players:{FORMATS.NUMBER}} Live: {overview.nb_players_live:{FORMATS.NUMBER}} (updated {overview.date}){ESC.CLEAR_LINE}")
+        if donations:
+            print(get_prize_text(donations))
+        if overview:
+            print(f"Sessions: {overview.sessions:{FORMATS.NUMBER}} Falls: {overview.falls[0]:{FORMATS.NUMBER}} Jumps: {overview.jumps:{FORMATS.NUMBER}} Resets: {overview.resets:{FORMATS.NUMBER}}")
+            print(f"Players: Total: {overview.players:{FORMATS.NUMBER}} Live: {overview.nb_players_live:{FORMATS.NUMBER}} (updated {overview.date}){ESC.CLEAR_LINE}")
         print(COLOURS.text("Close to PB", COLOURS.WHITE, COLOURS.GREEN), COLOURS.text("Close to WR", COLOURS.WHITE, COLOURS.RED))
 
         print("Leaderboard", " " * 43, "Live")
@@ -105,7 +109,6 @@ def tick(time_left):
 
 
 def main():
-    # ESC.enable_focus_report()
     ESC.enable_alt_buffer()
     ESC.hide_cursor()
     if len(sys.argv) > 1 and len(sys.argv) % 2 == 1:
